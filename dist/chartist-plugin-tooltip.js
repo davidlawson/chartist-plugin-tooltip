@@ -29,7 +29,8 @@
         y: -20
       },
       appendToBody: false,
-      class: undefined
+      class: undefined,
+      setPosition: true
       // showTooltips: true,
       // tooltipEvents: ['mousemove', 'touchstart', 'touchmove'],
       // labelClass: 'ct-label',
@@ -117,7 +118,10 @@
           }
 
           $toolTip.innerHTML = tooltipText;
-          setPosition(event);
+
+          if (options.setPosition)
+            setPosition(event);
+
           show($toolTip);
 
           // Remember height and width to avoid wrong position in IE
@@ -129,9 +133,12 @@
           hide($toolTip);
         });
 
-        on('mousemove', null, function (event) {
-          setPosition(event);
-        });
+        if (options.setPosition)
+        {
+          on('mousemove', null, function (event) {
+            setPosition(event);
+          });
+        }
 
         function setPosition(event) {
           // For some reasons, on FF, we can't rely on event.offsetX and event.offsetY,
