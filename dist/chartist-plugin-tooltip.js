@@ -46,17 +46,7 @@
       options = Chartist.extend({}, defaultOptions, options);
 
       return function tooltip(chart) {
-        var tooltipSelector = 'ct-point';
-        if (chart instanceof Chartist.Bar) {
-          tooltipSelector = 'ct-bar';
-        } else if (chart instanceof Chartist.Pie) {
-          // Added support for donut graph
-          if (chart.options.donut) {
-            tooltipSelector = 'ct-slice-donut';
-          } else {
-            tooltipSelector = 'ct-slice-pie';
-          }
-        }
+        var tooltipSelectors = ['ct-point', 'ct-bar', 'ct-bar-background', 'ct-slice-donut', 'ct-slice-pie'];
 
         var $chart = chart.container;
         var $toolTip = $chart.querySelector('.chartist-tooltip');
@@ -74,14 +64,23 @@
 
         hide($toolTip);
 
-        function on(event, selector, callback) {
+        function on(event, selectors, callback) {
           $chart.addEventListener(event, function (e) {
-            if (!selector || hasClass(e.target, selector))
-              callback(e);
+            if (!selectors)
+                callback(e);
+
+            for (var selectorIndex in selectors)
+            {
+              if (hasClass(e.target, selectors[selectorIndex]))
+              {
+                callback(e);
+                break;
+              }
+            }
           });
         }
 
-        on('mouseover', tooltipSelector, function (event) {
+        on('mouseover', tooltipSelectors, function (event) {
           var $point = event.target;
           var tooltipText = '';
 
@@ -89,7 +88,7 @@
               $point.parentNode.getAttribute('ct:series-name') : '';
           var meta = $point.getAttribute('ct:meta') || seriesName || '';
           var hasMeta = !!meta;
-          var value = $point.getAttribute('ct:value');
+          var value = $point.getAttribute('ct:value') || ($point.parentNode ? $point.parentNode.getAttribute('ct:value') : '');
 
           if (options.tooltipFnc) {
             tooltipText = options.tooltipFnc(meta, value);
@@ -129,7 +128,7 @@
           width = $toolTip.offsetWidth;
         });
 
-        on('mouseout', tooltipSelector, function () {
+        on('mouseout', tooltipSelectors, function () {
           hide($toolTip);
         });
 
@@ -181,7 +180,6 @@
     }
 
   } (window, document, Chartist));
-
   return Chartist.plugins.tooltips;
 
 }));
